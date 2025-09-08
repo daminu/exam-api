@@ -1,0 +1,23 @@
+meta {
+  name: Create
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{HOST}}:{{PORT}}/v1/trainings
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "title": "Title",
+    "description": "Description",
+    "imageKey": "https://s3.com"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

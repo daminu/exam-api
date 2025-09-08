@@ -1,0 +1,25 @@
+meta {
+  name: Get Questions
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{HOST}}:{{PORT}}/v1/trainings/:trainingId/questions
+  body: json
+  auth: inherit
+}
+
+params:path {
+  trainingId: 1
+}
+
+body:json {
+  {
+    "text": "question 1"
+  }
+}
+
+settings {
+  encodeUrl: true
+}

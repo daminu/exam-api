@@ -1,0 +1,25 @@
+meta {
+  name: Add Question
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{HOST}}:{{PORT}}/v1/trainings/:trainingId/questions
+  body: json
+  auth: inherit
+}
+
+params:path {
+  trainingId: 1
+}
+
+body:json {
+  {
+    "text": "question 1"
+  }
+}
+
+settings {
+  encodeUrl: true
+}
