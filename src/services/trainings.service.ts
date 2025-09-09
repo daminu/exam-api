@@ -1,14 +1,14 @@
-import { db } from '../database/connection.ts';
-import { questions, trainings } from '../database/schema.ts';
+import { db } from '../database/connection.js';
+import { choices, questions, SOURCE, trainings } from '../database/schema.js';
 import type {
   AddQuestionSchema,
   CreateTrainingSchema,
-} from '../routes/trainings.route.ts';
-import { NotFoundException } from '@/utils/exception.util.ts';
+} from '../routes/trainings.route.js';
+import { NotFoundException } from '../utils/exception.util.js';
 import {
   PaginationResponse,
   type PaginationQuerySchema,
-} from '@/utils/pagination.util.ts';
+} from '../utils/pagination.util.js';
 import { count, eq } from 'drizzle-orm';
 import type z from 'zod';
 
@@ -57,30 +57,66 @@ export class TrainingsService {
     trainingId: number,
     values: z.infer<typeof AddQuestionSchema>
   ) {
-    const training = await db.query.trainings.findFirst({
-      where: eq(trainings.id, trainingId),
+    const questionId = await db.transaction(async (tx) => {
+      const training = await tx.query.trainings.findFirst({
+        where: ({ id }) => eq(id, trainingId),
+      });
+      if (!training) {
+        throw new NotFoundException('Training not found!');
+      }
+      const [returning] = await tx
+        .insert(questions)
+        .values({
+          text: values.text,
+          trainingId: trainingId,
+          source: SOURCE.MANUAL,
+        })
+        .$returningId();
+      const questionId = returning!.id;
+      await tx.insert(choices).values(
+        values.choices.map((choice) => ({
+          text: choice.text,
+          isCorrect: choice.isCorrect,
+          questionId,
+        }))
+      );
+      return questionId;
     });
-    if (!training) {
-      throw new NotFoundException('Training not found!');
-    }
-    const [result] = await db
-      .insert(questions)
-      .values({
-        trainingId,
-        text: values.text,
-      })
-      .$returningId();
     const question = await db.query.questions.findFirst({
-      where: eq(questions.id, result!.id),
+      columns: {
+        id: true,
+        text: true,
+      },
+      where: ({ id }) => eq(id, questionId),
+      with: {
+        choices: {
+          columns: {
+            id: true,
+            isCorrect: true,
+            text: true,
+          },
+        },
+      },
     });
     return question!;
   }
 
   static async getQuestions(trainingId: number) {
     const list = await db.query.questions.findMany({
+      columns: {
+        id: true,
+        text: true,
+        source: true,
+      },
       where: eq(questions.trainingId, trainingId),
       with: {
-        choices: true,
+        choices: {
+          columns: {
+            id: true,
+            text: true,
+            isCorrect: true,
+          },
+        },
       },
     });
     return list;

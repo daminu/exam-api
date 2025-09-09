@@ -1,7 +1,8 @@
-import { env } from './env.ts';
-import AuthRouter from './routes/auth.route.ts';
-import TrainingsRouter from './routes/trainings.route.ts';
-import { HttpException } from './utils/exception.util.ts';
+import { env } from './env.js';
+import AIRouter from './routes/ai.route.js';
+import AuthRouter from './routes/auth.route.js';
+import TrainingsRouter from './routes/trainings.route.js';
+import { HttpException } from './utils/exception.util.js';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import type { Request, Response } from 'express';
@@ -21,6 +22,7 @@ app.get('/health', (_req, res) => {
 
 app.use('/v1/auth', AuthRouter);
 app.use('/v1/trainings', TrainingsRouter);
+app.use('/v1/ai', AIRouter);
 
 app.use((error: Error, _req: Request, res: Response) => {
   if (error instanceof HttpException) {

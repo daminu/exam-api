@@ -1,5 +1,5 @@
-import { env } from '../env.ts';
-import * as schema from './schema.ts';
+import { env } from '../env.js';
+import * as schema from './schema.js';
 import { drizzle } from 'drizzle-orm/mysql2';
 import { createPool } from 'mysql2/promise';
 

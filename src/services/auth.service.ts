@@ -1,12 +1,12 @@
-import { db } from '@/database/connection.ts';
-import { users } from '@/database/schema.ts';
-import type { LoginSchema, RegisterSchema } from '@/routes/auth.route.ts';
-import { hashPassword } from '@/utils/bcrypt.util.ts';
+import { db } from '../database/connection.js';
+import { ROLE, users } from '../database/schema.js';
+import type { LoginSchema, RegisterSchema } from '../routes/auth.route.js';
+import { hashPassword } from '../utils/bcrypt.util.js';
 import {
   ConflictException,
   UnauthorizedException,
-} from '@/utils/exception.util.ts';
-import { sign } from '@/utils/jwt.util.ts';
+} from '../utils/exception.util.js';
+import { sign } from '../utils/jwt.util.js';
 import { compare } from 'bcrypt';
 import { DrizzleQueryError, eq } from 'drizzle-orm';
 import type z from 'zod';
@@ -18,7 +18,7 @@ export class AuthService {
       await db.insert(users).values({
         email: values.email,
         password: hashedPassword,
-        role: 'USER',
+        role: ROLE.USER,
       });
     } catch (error) {
       if (error instanceof DrizzleQueryError) {

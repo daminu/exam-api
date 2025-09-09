@@ -1,10 +1,10 @@
-import type { ROLE } from '../database/schema.ts';
-import { env } from '../env.ts';
-import { verify, type Payload } from '../utils/jwt.util.ts';
+import type { ROLE } from '../database/schema.js';
+import { env } from '../env.js';
 import {
   ForbiddenException,
   UnauthorizedException,
-} from '@/utils/exception.util.ts';
+} from '../utils/exception.util.js';
+import { verify, type Payload } from '../utils/jwt.util.js';
 import type { Request, Response } from 'express';
 import type { NextFunction } from 'express';
 

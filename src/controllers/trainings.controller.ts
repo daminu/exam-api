@@ -3,8 +3,8 @@ import type {
   CreateTrainingSchema,
   TrainingIdParamSchema,
 } from '../routes/trainings.route.ts';
-import { TrainingsService } from '../services/trainings.service.ts';
-import type { PaginationQuerySchema } from '@/utils/pagination.util.ts';
+import { TrainingsService } from '../services/trainings.service.js';
+import type { PaginationQuerySchema } from '../utils/pagination.util.ts';
 import type { Request, Response } from 'express';
 import type z from 'zod';
 

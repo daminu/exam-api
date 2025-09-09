@@ -1,5 +1,5 @@
 import type { ROLE } from '../database/schema.ts';
-import { env } from '../env.ts';
+import { env } from '../env.js';
 import { createSecretKey } from 'crypto';
 import { jwtVerify, SignJWT } from 'jose';
 

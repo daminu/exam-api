@@ -23,6 +23,8 @@ const EnvSchema = z.object({
   S3_BUCKET: z.string(),
   S3_ACCESS_KEY: z.string(),
   S3_SECRET_KEY: z.string(),
+
+  OPENAI_API_KEY: z.string(),
 });
 
 let env: z.infer<typeof EnvSchema>;

@@ -10,9 +10,15 @@ import {
   bigint,
 } from 'drizzle-orm/mysql-core';
 
-const roleEnum = mysqlEnum(['ADMIN', 'USER']);
+export enum ROLE {
+  ADMIN = 'ADMIN',
+  USER = 'USER',
+}
 
-export type ROLE = (typeof users.role.enumValues)[number];
+export enum SOURCE {
+  MANUAL = 'MANUAL',
+  AI = 'AI',
+}
 
 const createdAt = timestamp('created_at', { mode: 'string' })
   .notNull()
@@ -28,7 +34,7 @@ export const users = mysqlTable('users', {
   password: varchar('password', { length: 255 }).notNull(),
   createdAt,
   updatedAt,
-  role: roleEnum.notNull(),
+  role: mysqlEnum('role', ROLE).notNull(),
 });
 
 export const trainings = mysqlTable('trainings', {
@@ -54,6 +60,7 @@ export const questions = mysqlTable('questions', {
     .notNull()
     .references(() => trainings.id),
   text: varchar('text', { length: 1024 }).notNull(),
+  source: mysqlEnum('source', SOURCE).notNull(),
   createdAt,
   updatedAt,
 });
@@ -68,7 +75,7 @@ export const questionsRelations = relations(questions, ({ one, many }) => ({
 
 export const choices = mysqlTable('choices', {
   id: serial('id').primaryKey(),
-  questionId: bigint('training_id', {
+  questionId: bigint('question_id', {
     mode: 'number',
     unsigned: true,
   })

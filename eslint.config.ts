@@ -1,4 +1,3 @@
-// eslint.config.js
 import js from '@eslint/js';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import { defineConfig } from 'eslint/config';
@@ -7,7 +6,7 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   {
-    files: ['**/*.{js,mjs,cjs,ts,mts,cts}'],
+    files: ['src/**/*.{js,mjs,cjs,ts,mts,cts}'],
     languageOptions: {
       globals: globals.node,
       parserOptions: {
