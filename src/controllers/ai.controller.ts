@@ -1,5 +1,5 @@
-import type { GenerateQuestionSchema } from '../routes/ai.route.ts';
 import { AIService } from '../services/ai.service.js';
+import type { GenerateQuestionSchema } from '../utils/schema.util.js';
 import type { Request, Response } from 'express';
 import type z from 'zod';
 

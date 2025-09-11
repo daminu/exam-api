@@ -20,13 +20,13 @@ export enum SOURCE {
   AI = 'AI',
 }
 
-const createdAt = timestamp('created_at', { mode: 'string' })
-  .notNull()
-  .defaultNow();
-const updatedAt = timestamp('updated_at', { mode: 'string' })
-  .notNull()
-  .defaultNow()
-  .onUpdateNow();
+export enum STATUS {
+  STARTED = 'STARTED',
+  ENDED = 'ENDED',
+}
+
+const createdAt = timestamp('created_at').notNull().defaultNow();
+const updatedAt = timestamp('updated_at').notNull().defaultNow().onUpdateNow();
 
 export const users = mysqlTable('users', {
   id: serial('id').primaryKey(),
@@ -36,6 +36,10 @@ export const users = mysqlTable('users', {
   updatedAt,
   role: mysqlEnum('role', ROLE).notNull(),
 });
+
+export const usersRelations = relations(users, ({ many }) => ({
+  exams: many(exams),
+}));
 
 export const trainings = mysqlTable('trainings', {
   id: serial('id').primaryKey(),
@@ -49,6 +53,7 @@ export const trainings = mysqlTable('trainings', {
 
 export const trainingsRelations = relations(trainings, ({ many }) => ({
   questions: many(questions),
+  exams: many(exams),
 }));
 
 export const questions = mysqlTable('questions', {
@@ -71,6 +76,7 @@ export const questionsRelations = relations(questions, ({ one, many }) => ({
     references: [trainings.id],
   }),
   choices: many(choices),
+  examQuestions: many(examQuestions),
 }));
 
 export const choices = mysqlTable('choices', {
@@ -87,9 +93,80 @@ export const choices = mysqlTable('choices', {
   updatedAt,
 });
 
-export const choicesRelations = relations(choices, ({ one }) => ({
+export const choicesRelations = relations(choices, ({ one, many }) => ({
   question: one(questions, {
     fields: [choices.questionId],
     references: [questions.id],
+  }),
+  examQuestions: many(examQuestions),
+}));
+
+export const exams = mysqlTable('exams', {
+  id: serial('id').primaryKey(),
+  trainingId: bigint('training_id', {
+    mode: 'number',
+    unsigned: true,
+  })
+    .notNull()
+    .references(() => trainings.id),
+  userId: bigint('user_id', {
+    mode: 'number',
+    unsigned: true,
+  })
+    .notNull()
+    .references(() => users.id),
+  status: mysqlEnum(STATUS).notNull(),
+  lastSubmittedAt: timestamp('last_submitted_at'),
+  endedAt: timestamp('ended_at'),
+  createdAt,
+  updatedAt,
+});
+
+export const examsRelations = relations(exams, ({ many, one }) => ({
+  examQuestions: many(examQuestions),
+  training: one(trainings, {
+    fields: [exams.trainingId],
+    references: [trainings.id],
+  }),
+  user: one(users, {
+    fields: [exams.userId],
+    references: [users.id],
+  }),
+}));
+
+export const examQuestions = mysqlTable('exam_questions', {
+  id: serial('id').primaryKey(),
+  examId: bigint('exam_id', {
+    mode: 'number',
+    unsigned: true,
+  })
+    .notNull()
+    .references(() => exams.id),
+  questionId: bigint('question_id', {
+    mode: 'number',
+    unsigned: true,
+  })
+    .notNull()
+    .references(() => questions.id),
+  choiceId: bigint('choice_id', {
+    mode: 'number',
+    unsigned: true,
+  }).references(() => choices.id),
+  createdAt,
+  updatedAt,
+});
+
+export const examQuestionsRelations = relations(examQuestions, ({ one }) => ({
+  exam: one(exams, {
+    fields: [examQuestions.examId],
+    references: [exams.id],
+  }),
+  question: one(questions, {
+    fields: [examQuestions.questionId],
+    references: [questions.id],
+  }),
+  choice: one(choices, {
+    fields: [examQuestions.choiceId],
+    references: [choices.id],
   }),
 }));

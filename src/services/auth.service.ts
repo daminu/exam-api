@@ -1,12 +1,12 @@
 import { db } from '../database/connection.js';
 import { ROLE, users } from '../database/schema.js';
-import type { LoginSchema, RegisterSchema } from '../routes/auth.route.js';
 import { hashPassword } from '../utils/bcrypt.util.js';
 import {
   ConflictException,
   UnauthorizedException,
 } from '../utils/exception.util.js';
 import { sign } from '../utils/jwt.util.js';
+import type { RegisterSchema, LoginSchema } from '../utils/schema.util.js';
 import { compare } from 'bcrypt';
 import { DrizzleQueryError, eq } from 'drizzle-orm';
 import type z from 'zod';

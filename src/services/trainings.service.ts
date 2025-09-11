@@ -1,15 +1,23 @@
 import { db } from '../database/connection.js';
-import { choices, questions, SOURCE, trainings } from '../database/schema.js';
-import type {
-  AddQuestionSchema,
-  CreateTrainingSchema,
-} from '../routes/trainings.route.js';
+import {
+  choices,
+  examQuestions,
+  exams,
+  questions,
+  SOURCE,
+  STATUS,
+  trainings,
+} from '../database/schema.js';
 import { NotFoundException } from '../utils/exception.util.js';
 import {
   PaginationResponse,
   type PaginationQuerySchema,
 } from '../utils/pagination.util.js';
-import { count, eq } from 'drizzle-orm';
+import type {
+  CreateTrainingSchema,
+  AddQuestionSchema,
+} from '../utils/schema.util.js';
+import { count, eq, sql } from 'drizzle-orm';
 import type z from 'zod';
 
 export class TrainingsService {
@@ -120,5 +128,48 @@ export class TrainingsService {
       },
     });
     return list;
+  }
+
+  static async startExam(userId: number, trainingId: number) {
+    const training = await db.query.trainings.findFirst({
+      where: ({ id }) => eq(id, trainingId),
+      columns: {
+        id: true,
+      },
+    });
+    if (!training) {
+      throw new NotFoundException('Training not found!');
+    }
+    const result = await db.transaction(async (tx) => {
+      const [returning] = await tx
+        .insert(exams)
+        .values({
+          status: STATUS.STARTED,
+          trainingId: training.id,
+          userId,
+        })
+        .$returningId();
+      const questions = await tx.query.questions.findMany({
+        where: ({ trainingId }) => eq(trainingId, training.id),
+        limit: 10,
+        orderBy: () => sql`RAND()`,
+        columns: {
+          id: true,
+        },
+      });
+      const newExamQuestions = questions.map(
+        (q) =>
+          ({
+            examId: returning!.id,
+            questionId: q.id,
+          }) satisfies typeof examQuestions.$inferInsert
+      );
+      await tx.insert(examQuestions).values(newExamQuestions);
+      return {
+        examId: returning!.id,
+      };
+    });
+
+    return result;
   }
 }

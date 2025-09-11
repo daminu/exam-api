@@ -1,6 +1,6 @@
 import { env } from '../env.js';
-import type { LoginSchema, RegisterSchema } from '../routes/auth.route.ts';
 import { AuthService } from '../services/auth.service.js';
+import type { RegisterSchema, LoginSchema } from '../utils/schema.util.js';
 import type { Request, Response } from 'express';
 import type { z } from 'zod';
 

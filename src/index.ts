@@ -1,11 +1,12 @@
 import { env } from './env.js';
 import AIRouter from './routes/ai.route.js';
 import AuthRouter from './routes/auth.route.js';
+import ExamsRouter from './routes/exams.route.js';
 import TrainingsRouter from './routes/trainings.route.js';
 import { HttpException } from './utils/exception.util.js';
 import cookieParser from 'cookie-parser';
 import express from 'express';
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 const app = express();
 
@@ -23,8 +24,11 @@ app.get('/health', (_req, res) => {
 app.use('/v1/auth', AuthRouter);
 app.use('/v1/trainings', TrainingsRouter);
 app.use('/v1/ai', AIRouter);
+app.use('/v1/exams', ExamsRouter);
 
-app.use((error: Error, _req: Request, res: Response) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.error(error);
   if (error instanceof HttpException) {
     res.status(error.status).json({
       error: error.name,
@@ -32,7 +36,6 @@ app.use((error: Error, _req: Request, res: Response) => {
     });
     return;
   }
-  console.error(error);
   res.status(500).json({
     error: 'Something went wrong!',
     message: error.message,

@@ -1,8 +1,9 @@
 import { db } from '../database/connection.js';
 import { choices, questions, SOURCE } from '../database/schema.js';
-import type { GenerateQuestionSchema } from '../routes/ai.route.ts';
 import { suggestQuestions } from '../utils/ai.util.js';
-import { inArray } from 'drizzle-orm';
+import { NotFoundException } from '../utils/exception.util.js';
+import type { GenerateQuestionSchema } from '../utils/schema.util.js';
+import { eq, inArray } from 'drizzle-orm';
 import type z from 'zod';
 
 export class AIService {
@@ -12,6 +13,17 @@ export class AIService {
     const suggestedQuestions = await suggestQuestions(values);
     const questionIds: number[] = [];
 
+    const training = await db.query.trainings.findFirst({
+      where: (trainingsTable) => eq(trainingsTable.id, values.trainingId),
+      columns: {
+        id: true,
+      },
+    });
+
+    if (!training) {
+      throw new NotFoundException('Training not found.');
+    }
+
     await db.transaction(async (tx) => {
       for (const suggestedQuestion of suggestedQuestions) {
         const [returningQuestion] = await tx
@@ -19,7 +31,7 @@ export class AIService {
           .values({
             source: SOURCE.AI,
             text: suggestedQuestion.text,
-            trainingId: values.trainingId,
+            trainingId: training.id,
           })
           .$returningId();
         const questionId = returningQuestion!.id;

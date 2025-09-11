@@ -1,0 +1,19 @@
+meta {
+  name: End Exam
+  type: http
+  seq: 3
+}
+
+post {
+  url: {{HOST}}:{{PORT}}/v1/exams/:examId/end
+  body: none
+  auth: inherit
+}
+
+params:path {
+  examId: 
+}
+
+settings {
+  encodeUrl: true
+}

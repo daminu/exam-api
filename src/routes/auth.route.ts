@@ -1,19 +1,9 @@
 import { AuthController } from '../controllers/auth.controller.js';
 import { validateBody } from '../middlewares/validation.middleware.js';
+import { RegisterSchema, LoginSchema } from '../utils/schema.util.js';
 import { Router } from 'express';
-import z from 'zod';
 
 const AuthRouter = Router();
-
-export const RegisterSchema = z.object({
-  email: z.email(),
-  password: z.string(),
-});
-
-export const LoginSchema = z.object({
-  email: z.email(),
-  password: z.string(),
-});
 
 AuthRouter.post(
   '/register',

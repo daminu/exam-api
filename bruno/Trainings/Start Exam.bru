@@ -1,0 +1,19 @@
+meta {
+  name: Start Exam
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{HOST}}:{{PORT}}/v1/trainings/:trainingId/exams
+  body: none
+  auth: inherit
+}
+
+params:path {
+  trainingId: 1
+}
+
+settings {
+  encodeUrl: true
+}

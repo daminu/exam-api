@@ -1,0 +1,26 @@
+meta {
+  name: Submit Question
+  type: http
+  seq: 2
+}
+
+put {
+  url: {{HOST}}:{{PORT}}/v1/exams/:examId/questions/:examQuestionId/submit
+  body: json
+  auth: inherit
+}
+
+params:path {
+  examQuestionId: 1
+  examId: 3
+}
+
+body:json {
+  {
+    "choiceId": 1
+  }
+}
+
+settings {
+  encodeUrl: true
+}

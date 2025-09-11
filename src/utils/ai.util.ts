@@ -1,5 +1,5 @@
-import { AddQuestionSchema } from '../routes/trainings.route.js';
 import { createPrompt } from './prompt.util.js';
+import { AddQuestionSchema } from './schema.util.js';
 import { openai } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 

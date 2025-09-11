@@ -1,10 +1,10 @@
-import type {
-  AddQuestionSchema,
-  CreateTrainingSchema,
-  TrainingIdParamSchema,
-} from '../routes/trainings.route.ts';
 import { TrainingsService } from '../services/trainings.service.js';
 import type { PaginationQuerySchema } from '../utils/pagination.util.ts';
+import type {
+  CreateTrainingSchema,
+  AddQuestionSchema,
+  TrainingIdParamSchema,
+} from '../utils/schema.util.js';
 import type { Request, Response } from 'express';
 import type z from 'zod';
 
@@ -43,5 +43,13 @@ export class TrainingsController {
       (req.params as z.infer<typeof TrainingIdParamSchema>).trainingId
     );
     res.status(200).json(result);
+  }
+
+  static async startExam(req: Request<object>, res: Response) {
+    const result = await TrainingsService.startExam(
+      req.user.id,
+      (req.params as z.infer<typeof TrainingIdParamSchema>).trainingId
+    );
+    res.status(201).json(result);
   }
 }
