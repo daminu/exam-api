@@ -93,7 +93,7 @@ npm start
 
 ## 🧪 API Testing
 
-This repo includes (Bruno)[https://www.usebruno.com/] collections (/bruno) for testing endpoints.
+This repo includes [Bruno](https://www.usebruno.com) collections (/bruno) for testing endpoints.
 
 Examples:
 
