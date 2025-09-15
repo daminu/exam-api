@@ -116,8 +116,9 @@ export const exams = mysqlTable('exams', {
     .notNull()
     .references(() => users.id),
   status: mysqlEnum(STATUS).notNull(),
-  lastSubmittedAt: timestamp('last_submitted_at'),
+  startedAt: timestamp('started_at'),
   endedAt: timestamp('ended_at'),
+  lastSubmittedAt: timestamp('last_submitted_at'),
   createdAt,
   updatedAt,
 });

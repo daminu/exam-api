@@ -12,7 +12,7 @@ export async function suggestQuestions({
   description: string;
   numQuestions: number;
 }) {
-  const { object, response, request } = await generateObject({
+  const { object } = await generateObject({
     model,
     prompt: description,
     schema: AddQuestionSchema,
@@ -22,7 +22,5 @@ export async function suggestQuestions({
     }),
     output: 'array',
   });
-  console.dir(request.body, { depth: null });
-  console.log(response.body, { depth: null });
   return object;
 }

@@ -64,7 +64,6 @@ export class ExamsService {
         id: true,
         status: true,
         lastSubmittedAt: true,
-        endedAt: true,
       },
     });
     if (!exam) {
