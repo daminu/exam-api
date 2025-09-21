@@ -18,6 +18,9 @@ const EnvSchema = z.object({
   JWT_SECRET: z.string().min(32),
   JWT_EXPIRES_IN: z.string().default('7d'),
   JWT_COOKIE_NAME: z.string(),
+  JWT_COOKIE_DOMAIN: z.string(),
+
+  ORIGINS: z.string(),
 
   S3_REGION: z.string(),
   S3_BUCKET: z.string(),
@@ -25,6 +28,13 @@ const EnvSchema = z.object({
   S3_SECRET_KEY: z.string(),
 
   OPENAI_API_KEY: z.string(),
+
+  VONAGE_BRAND_NAME: z.string(),
+  VONAGE_COUNTRY_CODE: z.string(),
+  VONAGE_APPLICATION_ID: z.string(),
+  VONAGE_API_KEY: z.string(),
+  VONAGE_API_SECRET: z.string(),
+  VONAGE_PRIVATE_KEY: z.string().startsWith('-----BEGIN PRIVATE KEY-----'),
 });
 
 let env: z.infer<typeof EnvSchema>;

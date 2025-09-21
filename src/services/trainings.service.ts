@@ -6,6 +6,7 @@ import {
   questions,
   SOURCE,
   STATUS,
+  temporaryUploads,
   trainings,
 } from '../database/schema.js';
 import { NotFoundException } from '../utils/exception.util.js';
@@ -13,28 +14,44 @@ import {
   PaginationResponse,
   type PaginationQuerySchema,
 } from '../utils/pagination.util.js';
+import { moveObject, objectExists } from '../utils/s3.util.js';
 import type {
-  CreateTrainingSchema,
+  CreateTrainingRequestSchema,
   AddQuestionSchema,
 } from '../utils/schema.util.js';
 import { count, eq, sql } from 'drizzle-orm';
 import type z from 'zod';
 
 export class TrainingsService {
-  static async create(values: z.infer<typeof CreateTrainingSchema>) {
-    const result = await db
-      .insert(trainings)
-      .values({
-        title: values.title,
-        description: values.description,
-        imageKey: values.imageKey,
-        isPublished: false,
-      })
-      .$returningId();
-    if (!result) {
-      throw new Error("Trainings id wasn't returned.");
+  static async create(values: z.infer<typeof CreateTrainingRequestSchema>) {
+    const exists = await objectExists(values.imageKey);
+    if (!exists) {
+      throw new NotFoundException('Please upload image first.');
     }
-    return result[0]!;
+    const result = await db.transaction(async (tx) => {
+      const [training] = await tx
+        .insert(trainings)
+        .values({
+          title: values.title,
+          description: values.description,
+          imageKey: values.imageKey,
+          isPublished: false,
+        })
+        .$returningId();
+      const filename = values.imageKey.split('/').at(-1);
+      const destinationKey = `trainings/${training!.id}/${filename}`;
+      await moveObject(values.imageKey, destinationKey);
+      await tx
+        .update(trainings)
+        .set({ imageKey: destinationKey })
+        .where(eq(trainings.id, training!.id));
+      await tx
+        .delete(temporaryUploads)
+        .where(eq(temporaryUploads.id, values.imageKey));
+      return training;
+    });
+
+    return { id: result!.id };
   }
 
   static async list(query: z.infer<typeof PaginationQuerySchema>) {

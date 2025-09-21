@@ -6,7 +6,7 @@ import {
   validateParams,
 } from '../middlewares/validation.middleware.js';
 import {
-  CreateTrainingSchema,
+  CreateTrainingRequestSchema,
   TrainingIdParamSchema,
   AddQuestionSchema,
 } from '../utils/schema.util.js';
@@ -17,7 +17,7 @@ const TrainingsRouter = Router();
 TrainingsRouter.post(
   '/',
   authorize(ROLE.ADMIN),
-  validateBody(CreateTrainingSchema),
+  validateBody(CreateTrainingRequestSchema),
   TrainingsController.create
 );
 

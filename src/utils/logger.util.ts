@@ -15,6 +15,7 @@ export const logger = pino({
         }
       : // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (undefined as any),
+  level: env.NODE_ENV === 'LOCAL' ? 'debug' : 'info',
 });
 
 export function logRequest(req: Request, res: Response) {
@@ -35,6 +36,6 @@ export function logHttpException(
 
 export function logUnexpectedError(req: Request, res: Response, error: Error) {
   logger.error(
-    `requestId: ${req.id}, timestamp: ${new Date().toISOString()}, userId: ${req.user?.id || null} url: ${req.url}, method: ${req.method}, query: ${JSON.stringify(req.query)}, statusCode: ${res.statusCode}, error: ${error.message}`
+    `requestId: ${req.id}, timestamp: ${new Date().toISOString()}, userId: ${req.user?.id || null} url: ${req.url}, method: ${req.method}, query: ${JSON.stringify(req.query)}, statusCode: ${res.statusCode}, error: ${JSON.stringify(error)}`
   );
 }

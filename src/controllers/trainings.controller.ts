@@ -1,17 +1,18 @@
 import { TrainingsService } from '../services/trainings.service.js';
 import type { PaginationQuerySchema } from '../utils/pagination.util.ts';
 import type {
-  CreateTrainingSchema,
+  CreateTrainingRequestSchema,
   AddQuestionSchema,
   TrainingIdParamSchema,
+  CreateTrainingResponseSchema,
 } from '../utils/schema.util.js';
 import type { Request, Response } from 'express';
 import type z from 'zod';
 
 export class TrainingsController {
   static async create(
-    req: Request<object, object, z.infer<typeof CreateTrainingSchema>>,
-    res: Response
+    req: Request<object, object, z.infer<typeof CreateTrainingRequestSchema>>,
+    res: Response<z.infer<typeof CreateTrainingResponseSchema>>
   ) {
     const result = await TrainingsService.create(req.body);
     res.status(201).json(result);

@@ -32,6 +32,7 @@ export const users = mysqlTable('users', {
   id: serial('id').primaryKey(),
   email: varchar('email', { length: 255 }).unique().notNull(),
   password: varchar('password', { length: 255 }).notNull(),
+  phoneNumber: varchar('phone_number', { length: 8 }).unique(),
   createdAt,
   updatedAt,
   role: mysqlEnum('role', ROLE).notNull(),
@@ -39,6 +40,7 @@ export const users = mysqlTable('users', {
 
 export const usersRelations = relations(users, ({ many }) => ({
   exams: many(exams),
+  vonageVerifcations: many(vonageVerifications),
 }));
 
 export const trainings = mysqlTable('trainings', {
@@ -171,3 +173,31 @@ export const examQuestionsRelations = relations(examQuestions, ({ one }) => ({
     references: [choices.id],
   }),
 }));
+
+export const temporaryUploads = mysqlTable('temporary_uploads', {
+  id: varchar('id', { length: 255 }).primaryKey(),
+  createdAt,
+  updatedAt,
+});
+
+export const vonageVerifications = mysqlTable('vonage_verifications', {
+  requestId: varchar('request_id', { length: 255 }).primaryKey(),
+  userId: bigint('user_id', {
+    mode: 'number',
+    unsigned: true,
+  })
+    .notNull()
+    .references(() => users.id),
+  createdAt,
+  updatedAt,
+});
+
+export const vonageVerificatoinsRelations = relations(
+  vonageVerifications,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [vonageVerifications.userId],
+      references: [users.id],
+    }),
+  })
+);

@@ -12,4 +12,5 @@ export default defineConfig({
     password: process.env.DB_PASSWORD as string,
     database: process.env.DB_DATABASE as string,
   },
+  verbose: true,
 });

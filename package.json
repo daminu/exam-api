@@ -23,8 +23,10 @@
     "@trivago/prettier-plugin-sort-imports": "^5.2.2",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^20.19.13",
+    "@types/swagger-ui-express": "^4.1.8",
     "dotenv": "^17.2.2",
     "drizzle-kit": "^0.31.4",
     "eslint": "^9.35.0",
@@ -45,9 +47,12 @@
     "@ai-sdk/openai": "^2.0.27",
     "@aws-sdk/client-s3": "^3.883.0",
     "@aws-sdk/s3-request-presigner": "^3.883.0",
+    "@vonage/server-sdk": "^3.25.0",
+    "@vonage/verify2": "^1.17.0",
     "ai": "^5.0.39",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
     "cron": "^4.3.3",
     "drizzle-orm": "^0.44.5",
     "express": "^5.1.0",
@@ -57,7 +62,9 @@
     "mysql2": "^3.14.4",
     "pino": "^9.9.5",
     "pino-pretty": "^13.1.1",
-    "zod": "^4.1.5"
+    "swagger-ui-express": "^5.0.1",
+    "zod": "^4.1.5",
+    "zod-openapi": "^5.4.1"
   },
   "lint-staged": {
     "*.ts": "eslint --cache --fix"

@@ -1,3 +1,5 @@
+import { MAX_TRAINING_IMAGE_FILE_SIZE } from '../constants.js';
+import { ROLE } from '../database/schema.js';
 import z from 'zod';
 
 export const ExamIdParamSchema = z.object({
@@ -12,7 +14,7 @@ export const SubmitQuestionSchema = z.object({
   choiceId: z.number().positive(),
 });
 
-export const RegisterSchema = z.object({
+export const RegisterRequestSchema = z.object({
   email: z.email(),
   password: z.string(),
 });
@@ -22,11 +24,35 @@ export const LoginSchema = z.object({
   password: z.string(),
 });
 
-export const CreateTrainingSchema = z.object({
+export const SendCodeRequestSchema = z.object({
+  phoneNumber: z.string().regex(/^[0-9]{8}$/, 'Phone number must be 8 digits.'),
+});
+
+export const SendCodeResponseSchema = z.object({
+  requestId: z.string(),
+});
+
+export const VerifyCodeRequestSchema = z.object({
+  requestId: z.string(),
+  phoneNumber: z.string().regex(/^[0-9]{8}$/, 'Phone number must be 8 digits.'),
+  code: z
+    .string()
+    .regex(/^[0-9]{6}$/, 'The confirmation code must be 6 digits.'),
+});
+
+export const MeResponseSchema = z.object({
+  id: z.number().meta({ examples: [123] }),
+  email: z.email().meta({ examples: ['user@email.com'] }),
+  role: z.enum(ROLE),
+});
+
+export const CreateTrainingRequestSchema = z.object({
   title: z.string().min(4).max(64),
   description: z.string().min(8).max(65535),
   imageKey: z.string(),
 });
+
+export const CreateTrainingResponseSchema = z.object({ id: z.number() });
 
 export const TrainingIdParamSchema = z.object({
   trainingId: z.coerce.number(),
@@ -65,4 +91,24 @@ export const GenerateQuestionSchema = z.object({
   description: z.string(),
   numQuestions: z.number().min(1).max(10),
   trainingId: z.number().int().positive(),
+});
+
+export const TrainingsPresignedUrlRequestSchema = z.object({
+  contentType: z.enum(['image/png', 'image/jpeg', 'image/webp']),
+  checksum: z.string().length(64),
+  fileSizeInBytes: z.number().max(MAX_TRAINING_IMAGE_FILE_SIZE),
+});
+
+export const TrainingsPresignedUrlResponseSchema = z.object({
+  uploadUrl: z.url(),
+  imageKey: z.string(),
+});
+
+export const HealthResponseSchema = z.object({
+  status: z.literal('OK'),
+  timestamp: z.date(),
+});
+
+export const MessageResponseSchema = z.object({
+  message: z.string(),
 });
