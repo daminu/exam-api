@@ -30,7 +30,7 @@ export function logHttpException(
   error: HttpException
 ) {
   logger.warn(
-    `requestId: ${req.id}, timestamp: ${new Date().toISOString()}, userId: ${req.user?.id || null} url: ${req.url}, method: ${req.method}, query: ${JSON.stringify(req.query)}, statusCode: ${res.statusCode}, error: ${error.message}`
+    `requestId: ${req.id}, timestamp: ${new Date().toISOString()}, userId: ${req.user?.id || null} url: ${req.url}, method: ${req.method}, query: ${JSON.stringify(req.query)}, statusCode: ${res.statusCode}, error: ${JSON.stringify(error)}`
   );
 }
 

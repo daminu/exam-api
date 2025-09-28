@@ -1,17 +1,25 @@
-import { AIController } from '../controllers/ai.controller.js';
+import { aiController } from '../controllers/ai.controller.js';
 import { ROLE } from '../database/schema.js';
 import { authorize } from '../middlewares/auth.middleware.js';
 import { validateBody } from '../middlewares/validation.middleware.js';
-import { GenerateQuestionSchema } from '../utils/schema.util.js';
+import {
+  GenerateQuestionsRequestSchema,
+  GenerateDescriptionRequestSchema,
+} from '../utils/schema.util.js';
 import { Router } from 'express';
 
-const AIRouter = Router();
+export const aiRouter = Router();
 
-AIRouter.post(
+aiRouter.post(
   '/questions/generate',
   authorize(ROLE.ADMIN),
-  validateBody(GenerateQuestionSchema),
-  AIController.generateQuestion
+  validateBody(GenerateQuestionsRequestSchema),
+  aiController.generateQuestions
 );
 
-export default AIRouter;
+aiRouter.post(
+  '/description/generate',
+  authorize(ROLE.ADMIN),
+  validateBody(GenerateDescriptionRequestSchema),
+  aiController.generateDescription
+);

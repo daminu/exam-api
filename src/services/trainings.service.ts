@@ -14,16 +14,17 @@ import {
   PaginationResponse,
   type PaginationQuerySchema,
 } from '../utils/pagination.util.js';
-import { moveObject, objectExists } from '../utils/s3.util.js';
+import { getFileUrl, moveObject, objectExists } from '../utils/r2.util.js';
 import type {
   CreateTrainingRequestSchema,
-  AddQuestionSchema,
+  AddQuestionRequestSchema,
+  EditQuestionRequestSchema,
 } from '../utils/schema.util.js';
-import { count, eq, sql } from 'drizzle-orm';
+import { count, eq, inArray, sql } from 'drizzle-orm';
 import type z from 'zod';
 
-export class TrainingsService {
-  static async create(values: z.infer<typeof CreateTrainingRequestSchema>) {
+class TrainingsService {
+  async create(values: z.infer<typeof CreateTrainingRequestSchema>) {
     const exists = await objectExists(values.imageKey);
     if (!exists) {
       throw new NotFoundException('Please upload image first.');
@@ -54,14 +55,13 @@ export class TrainingsService {
     return { id: result!.id };
   }
 
-  static async list(query: z.infer<typeof PaginationQuerySchema>) {
+  async list(query: z.infer<typeof PaginationQuerySchema>) {
     const items = await db.query.trainings.findMany({
       limit: query.limit,
       offset: query.offset,
       columns: {
         id: true,
         title: true,
-        description: true,
         imageKey: true,
         isPublished: true,
         createdAt: true,
@@ -71,16 +71,58 @@ export class TrainingsService {
 
     const [result] = await db.select({ total: count() }).from(trainings);
 
+    const list = items.map(
+      ({ id, title, imageKey, isPublished, createdAt, updatedAt }) => ({
+        id,
+        title,
+        imageUrl: getFileUrl(imageKey),
+        isPublished,
+        createdAt,
+        updatedAt,
+      })
+    );
+
     return new PaginationResponse({
-      items,
+      items: list,
       total: result!.total,
       size: items.length,
     });
   }
 
-  static async addQuestion(
+  async getById(id: number) {
+    const training = await db.query.trainings.findFirst({
+      columns: {
+        id: true,
+        title: true,
+        description: true,
+        createdAt: true,
+        updatedAt: true,
+        imageKey: true,
+        isPublished: true,
+      },
+      where: (trainingsTable) => eq(trainingsTable.id, id),
+    });
+
+    if (!training) {
+      throw new NotFoundException('Training not found');
+    }
+
+    const result = {
+      id: training.id,
+      title: training.title,
+      description: training.description,
+      createdAt: training.createdAt,
+      updatedAt: training.updatedAt,
+      imageUrl: getFileUrl(training.imageKey),
+      isPublished: training.isPublished,
+    };
+
+    return result;
+  }
+
+  async addQuestion(
     trainingId: number,
-    values: z.infer<typeof AddQuestionSchema>
+    values: z.infer<typeof AddQuestionRequestSchema>
   ) {
     const questionId = await db.transaction(async (tx) => {
       const training = await tx.query.trainings.findFirst({
@@ -111,6 +153,7 @@ export class TrainingsService {
       columns: {
         id: true,
         text: true,
+        source: true,
       },
       where: ({ id }) => eq(id, questionId),
       with: {
@@ -126,14 +169,55 @@ export class TrainingsService {
     return question!;
   }
 
-  static async getQuestions(trainingId: number) {
-    const list = await db.query.questions.findMany({
+  async editQuestion(
+    params: { trainingId: number; questionId: number },
+    values: z.infer<typeof EditQuestionRequestSchema>
+  ) {
+    const question = await db.query.questions.findFirst({
+      columns: {
+        id: true,
+      },
+      where: (fields, operators) =>
+        operators.and(
+          operators.eq(fields.id, params.questionId),
+          operators.eq(fields.trainingId, params.trainingId)
+        ),
+      with: {
+        choices: {
+          columns: {
+            id: true,
+          },
+        },
+      },
+    });
+    if (!question) {
+      throw new NotFoundException('Question not found.');
+    }
+    await db.transaction(async (tx) => {
+      const choiceIds = question.choices.map((c) => c.id);
+      await tx
+        .update(choices)
+        .set({ deletedAt: sql`CURRENT_TIMESTAMP` })
+        .where(inArray(choices.id, choiceIds));
+      const v = values.choices.map((c) => ({
+        questionId: question.id,
+        text: c.text,
+        isCorrect: c.isCorrect,
+      }));
+      await tx.insert(choices).values(v);
+      await tx
+        .update(questions)
+        .set({ text: values.text })
+        .where(eq(questions.id, question.id));
+    });
+
+    const editedQuestion = await db.query.questions.findFirst({
       columns: {
         id: true,
         text: true,
         source: true,
       },
-      where: eq(questions.trainingId, trainingId),
+      where: (fields, operators) => operators.eq(fields.id, question.id),
       with: {
         choices: {
           columns: {
@@ -141,13 +225,42 @@ export class TrainingsService {
             text: true,
             isCorrect: true,
           },
+          orderBy: (fields, operators) => [operators.asc(fields.id)],
+        },
+      },
+    });
+
+    return editedQuestion!;
+  }
+
+  async getQuestions(trainingId: number) {
+    const list = await db.query.questions.findMany({
+      columns: {
+        id: true,
+        text: true,
+        source: true,
+      },
+      where: (fields, operators) =>
+        operators.and(
+          operators.eq(fields.trainingId, trainingId),
+          operators.isNull(fields.deletedAt)
+        ),
+      orderBy: (fields, operators) => [operators.desc(fields.id)],
+      with: {
+        choices: {
+          columns: {
+            id: true,
+            text: true,
+            isCorrect: true,
+          },
+          orderBy: (fields, operators) => [operators.asc(fields.id)],
         },
       },
     });
     return list;
   }
 
-  static async startExam(userId: number, trainingId: number) {
+  async startExam(userId: number, trainingId: number) {
     const training = await db.query.trainings.findFirst({
       where: ({ id }) => eq(id, trainingId),
       columns: {
@@ -190,3 +303,5 @@ export class TrainingsService {
     return result;
   }
 }
+
+export const trainingsService = new TrainingsService();

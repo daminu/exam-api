@@ -6,8 +6,8 @@ import {
 } from '../utils/exception.util.js';
 import { and, eq, sql } from 'drizzle-orm';
 
-export class ExamsService {
-  static async getExam(examId: number) {
+class ExamsService {
+  async getExam(examId: number) {
     const exam = await db.query.exams.findFirst({
       where: ({ id }) => eq(id, examId),
       columns: {
@@ -46,7 +46,7 @@ export class ExamsService {
     return exam;
   }
 
-  static async submitQuestion({
+  async submitQuestion({
     examId,
     userId,
     examQuestionId,
@@ -121,7 +121,7 @@ export class ExamsService {
     return result;
   }
 
-  static async endExam(userId: number, examId: number) {
+  async endExam(userId: number, examId: number) {
     const exam = await db.query.exams.findFirst({
       where: (examsTable) =>
         and(eq(examsTable.userId, userId), eq(examsTable.id, examId)),
@@ -152,3 +152,5 @@ export class ExamsService {
     return updatedExam;
   }
 }
+
+export const examsService = new ExamsService();

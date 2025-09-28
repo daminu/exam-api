@@ -1,4 +1,4 @@
-import { TrainingsController } from '../controllers/trainings.controller.js';
+import { trainingsController } from '../controllers/trainings.controller.js';
 import { ROLE } from '../database/schema.js';
 import { authorize } from '../middlewares/auth.middleware.js';
 import {
@@ -8,41 +8,53 @@ import {
 import {
   CreateTrainingRequestSchema,
   TrainingIdParamSchema,
-  AddQuestionSchema,
+  AddQuestionRequestSchema,
+  TrainingIdQuestionIdParamsSchema,
 } from '../utils/schema.util.js';
 import { Router } from 'express';
 
-const TrainingsRouter = Router();
+export const trainingsRouter = Router();
 
-TrainingsRouter.post(
+trainingsRouter.post(
   '/',
   authorize(ROLE.ADMIN),
   validateBody(CreateTrainingRequestSchema),
-  TrainingsController.create
+  trainingsController.create
 );
 
-TrainingsRouter.get('/', authorize(ROLE.ADMIN), TrainingsController.list);
+trainingsRouter.get('/', authorize(ROLE.ADMIN), trainingsController.list);
 
-TrainingsRouter.post(
+trainingsRouter.get(
+  '/:trainingId',
+  authorize(ROLE.ADMIN),
+  validateParams(TrainingIdParamSchema),
+  trainingsController.getById
+);
+
+trainingsRouter.post(
   '/:trainingId/questions',
   authorize(ROLE.ADMIN),
   validateParams(TrainingIdParamSchema),
-  validateBody(AddQuestionSchema),
-  TrainingsController.addQuestion
+  validateBody(AddQuestionRequestSchema),
+  trainingsController.addQuestion
 );
 
-TrainingsRouter.get(
+trainingsRouter.get(
   '/:trainingId/questions',
-  authorize(ROLE.USER, ROLE.ADMIN),
-  validateParams(TrainingIdParamSchema),
-  TrainingsController.getQuestions
+  authorize(ROLE.ADMIN),
+  trainingsController.getQuestions
 );
 
-TrainingsRouter.post(
+trainingsRouter.put(
+  '/:trainingId/questions/:questionId',
+  authorize(ROLE.ADMIN),
+  validateParams(TrainingIdQuestionIdParamsSchema),
+  trainingsController.editQuestion
+);
+
+trainingsRouter.post(
   '/:trainingId/exams',
   authorize(ROLE.USER),
   validateParams(TrainingIdParamSchema),
-  TrainingsController.startExam
+  trainingsController.startExam
 );
-
-export default TrainingsRouter;

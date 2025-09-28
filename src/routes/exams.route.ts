@@ -1,4 +1,4 @@
-import { ExamsController } from '../controllers/exams.controller.js';
+import { examsController } from '../controllers/exams.controller.js';
 import { ROLE } from '../database/schema.js';
 import { authorize } from '../middlewares/auth.middleware.js';
 import {
@@ -12,28 +12,26 @@ import {
 } from '../utils/schema.util.js';
 import { Router } from 'express';
 
-const ExamsRouter = Router();
+export const examsRouter = Router();
 
-ExamsRouter.get(
+examsRouter.get(
   '/:examId',
   authorize(ROLE.USER),
   validateParams(ExamIdParamSchema),
-  ExamsController.getExam
+  examsController.getExam
 );
 
-ExamsRouter.put(
+examsRouter.put(
   '/:examId/questions/:examQuestionId/submit',
   authorize(ROLE.USER),
   validateParams(ExamQuestionIdParamSchema),
   validateBody(SubmitQuestionSchema),
-  ExamsController.submitQuestion
+  examsController.submitQuestion
 );
 
-ExamsRouter.post(
+examsRouter.post(
   '/:examId/end',
   authorize(ROLE.USER),
   validateParams(ExamIdParamSchema),
-  ExamsController.endExam
+  examsController.endExam
 );
-
-export default ExamsRouter;

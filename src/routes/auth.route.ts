@@ -1,4 +1,4 @@
-import { AuthController } from '../controllers/auth.controller.js';
+import { authController } from '../controllers/auth.controller.js';
 import { ROLE } from '../database/schema.js';
 import { authorize } from '../middlewares/auth.middleware.js';
 import { validateBody } from '../middlewares/validation.middleware.js';
@@ -10,28 +10,26 @@ import {
 } from '../utils/schema.util.js';
 import { Router } from 'express';
 
-const AuthRouter = Router();
+export const authRouter = Router();
 
-AuthRouter.post(
+authRouter.post(
   '/register',
   validateBody(RegisterRequestSchema),
-  AuthController.register
+  authController.register
 );
 
-AuthRouter.post('/login', validateBody(LoginSchema), AuthController.login);
+authRouter.post('/login', validateBody(LoginSchema), authController.login);
 
-AuthRouter.post(
+authRouter.post(
   '/send',
   validateBody(SendCodeRequestSchema),
-  AuthController.sendCode
+  authController.sendCode
 );
 
-AuthRouter.post(
+authRouter.post(
   '/verify',
   validateBody(VerifyCodeRequestSchema),
-  AuthController.verifyCode
+  authController.verifyCode
 );
 
-AuthRouter.get('/me', authorize(ROLE.ADMIN, ROLE.USER), AuthController.me);
-
-export default AuthRouter;
+authRouter.get('/me', authorize(ROLE.ADMIN, ROLE.USER), authController.me);

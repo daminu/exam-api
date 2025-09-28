@@ -19,15 +19,21 @@ const templates = {
     template: createTemplate('suggest-question-prompt.txt'),
     args: { numQuestions: 1 as number },
   },
+  'suggest-description': {
+    template: createTemplate('suggest-description.txt'),
+  },
 } as const;
 
 type Arguments = {
-  [K in keyof typeof templates]: (typeof templates)[K]['args'];
+  [K in keyof typeof templates]: (typeof templates)[K] extends { args: infer A }
+    ? A
+    : undefined;
 };
 
 export function createPrompt<T extends keyof Arguments>(options: {
   prompt: T;
-  args: Arguments[T];
+  args?: Arguments[T];
 }) {
-  return templates[options.prompt].template(options.args);
+  const templateDef = templates[options.prompt];
+  return templateDef.template(options.args ?? {});
 }

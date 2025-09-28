@@ -1,12 +1,12 @@
 import { db } from '../database/connection.js';
 import { temporaryUploads } from '../database/schema.js';
-import { getPresignedUrl } from '../utils/s3.util.js';
+import { getPresignedUrl } from '../utils/r2.util.js';
 import type { TrainingsPresignedUrlRequestSchema } from '../utils/schema.util.js';
 import { v4 as uuidv4 } from 'uuid';
 import type z from 'zod';
 
-export class UploadsService {
-  static async presignedUrl(
+class UploadsService {
+  async presignedUrl(
     userId: number,
     {
       contentType,
@@ -24,3 +24,5 @@ export class UploadsService {
     };
   }
 }
+
+export const uploadsService = new UploadsService();

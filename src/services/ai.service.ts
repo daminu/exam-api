@@ -1,14 +1,17 @@
 import { db } from '../database/connection.js';
 import { choices, questions, SOURCE } from '../database/schema.js';
-import { suggestQuestions } from '../utils/ai.util.js';
+import { suggestDescription, suggestQuestions } from '../utils/ai.util.js';
 import { NotFoundException } from '../utils/exception.util.js';
-import type { GenerateQuestionSchema } from '../utils/schema.util.js';
+import type {
+  GenerateQuestionsRequestSchema,
+  GenerateDescriptionRequestSchema,
+} from '../utils/schema.util.js';
 import { eq, inArray } from 'drizzle-orm';
 import type z from 'zod';
 
-export class AIService {
-  static async generateQuestions(
-    values: z.infer<typeof GenerateQuestionSchema>
+class AIService {
+  async generateQuestions(
+    values: z.infer<typeof GenerateQuestionsRequestSchema>
   ) {
     const suggestedQuestions = await suggestQuestions(values);
     const questionIds: number[] = [];
@@ -52,6 +55,7 @@ export class AIService {
         source: true,
         text: true,
       },
+      orderBy: (fields, operators) => [operators.desc(fields.id)],
       with: {
         choices: {
           columns: {
@@ -59,10 +63,20 @@ export class AIService {
             isCorrect: true,
             text: true,
           },
+          orderBy: (fields, operators) => [operators.asc(fields.id)],
         },
       },
     });
 
     return insertedQuestions;
   }
+
+  async generateDescription({
+    title,
+    model,
+  }: z.infer<typeof GenerateDescriptionRequestSchema>) {
+    return await suggestDescription({ title, model });
+  }
 }
+
+export const aiService = new AIService();

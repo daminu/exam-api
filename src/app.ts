@@ -4,11 +4,11 @@ import { setPayload } from './middlewares/auth.middleware.js';
 import { exceptionMiddleware } from './middlewares/exception.middleware.js';
 import { logMiddleware } from './middlewares/log.middleware.js';
 import { requestIdMiddleware } from './middlewares/request-id.middleware.js';
-import AIRouter from './routes/ai.route.js';
-import AuthRouter from './routes/auth.route.js';
-import ExamsRouter from './routes/exams.route.js';
-import TrainingsRouter from './routes/trainings.route.js';
-import UploadsRouter from './routes/uploads.route.js';
+import { aiRouter } from './routes/ai.route.js';
+import { authRouter } from './routes/auth.route.js';
+import { examsRouter } from './routes/exams.route.js';
+import { trainingsRouter } from './routes/trainings.route.js';
+import { uploadsRouter } from './routes/uploads.route.js';
 import type { HealthResponseSchema } from './utils/schema.util.js';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -46,11 +46,11 @@ app.get(
   }
 );
 
-app.use('/v1/auth', AuthRouter);
-app.use('/v1/trainings', TrainingsRouter);
-app.use('/v1/ai', AIRouter);
-app.use('/v1/exams', ExamsRouter);
-app.use('/v1/uploads', UploadsRouter);
+app.use('/v1/auth', authRouter);
+app.use('/v1/trainings', trainingsRouter);
+app.use('/v1/ai', aiRouter);
+app.use('/v1/exams', examsRouter);
+app.use('/v1/uploads', uploadsRouter);
 
 app.use(exceptionMiddleware());
 

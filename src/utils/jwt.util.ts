@@ -6,7 +6,6 @@ import { jwtVerify, SignJWT } from 'jose';
 export type Payload = {
   id: number;
   role: ROLE;
-  email: string;
 };
 
 const secretKey = createSecretKey(env.JWT_SECRET, 'utf-8');

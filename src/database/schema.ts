@@ -5,7 +5,6 @@ import {
   serial,
   timestamp,
   varchar,
-  text,
   boolean,
   bigint,
 } from 'drizzle-orm/mysql-core';
@@ -27,6 +26,7 @@ export enum STATUS {
 
 const createdAt = timestamp('created_at').notNull().defaultNow();
 const updatedAt = timestamp('updated_at').notNull().defaultNow().onUpdateNow();
+const deletedAt = timestamp('deleted_at');
 
 export const users = mysqlTable('users', {
   id: serial('id').primaryKey(),
@@ -46,11 +46,12 @@ export const usersRelations = relations(users, ({ many }) => ({
 export const trainings = mysqlTable('trainings', {
   id: serial('id').primaryKey(),
   title: varchar('title', { length: 255 }).notNull(),
-  description: text('description').notNull(),
+  description: varchar('description', { length: 2048 }).notNull(),
   imageKey: varchar('image_key', { length: 255 }).notNull(),
   isPublished: boolean('is_published').notNull(),
   createdAt,
   updatedAt,
+  deletedAt,
 });
 
 export const trainingsRelations = relations(trainings, ({ many }) => ({
@@ -70,6 +71,7 @@ export const questions = mysqlTable('questions', {
   source: mysqlEnum('source', SOURCE).notNull(),
   createdAt,
   updatedAt,
+  deletedAt,
 });
 
 export const questionsRelations = relations(questions, ({ one, many }) => ({
@@ -93,6 +95,7 @@ export const choices = mysqlTable('choices', {
   isCorrect: boolean('is_correct').notNull(),
   createdAt,
   updatedAt,
+  deletedAt,
 });
 
 export const choicesRelations = relations(choices, ({ one, many }) => ({

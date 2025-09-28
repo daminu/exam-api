@@ -1,5 +1,5 @@
 import { MAX_TRAINING_IMAGE_FILE_SIZE } from '../constants.js';
-import { ROLE } from '../database/schema.js';
+import { ROLE, SOURCE } from '../database/schema.js';
 import z from 'zod';
 
 export const ExamIdParamSchema = z.object({
@@ -48,17 +48,37 @@ export const MeResponseSchema = z.object({
 
 export const CreateTrainingRequestSchema = z.object({
   title: z.string().min(4).max(64),
-  description: z.string().min(8).max(65535),
+  description: z.string().min(8).max(2048),
   imageKey: z.string(),
 });
 
 export const CreateTrainingResponseSchema = z.object({ id: z.number() });
 
+export const GetTrainingResponseSchema = z.object({
+  id: z.number(),
+  title: z.string(),
+  description: z.string(),
+  createdAt: z.date(),
+  updatedAt: z.date(),
+  imageUrl: z.string(),
+  isPublished: z.boolean(),
+});
+
+export const GetTrainingsResponseSchema = z.object({
+  items: z.array(GetTrainingResponseSchema.omit({ description: true })),
+  total: z.number(),
+  size: z.number(),
+});
+
 export const TrainingIdParamSchema = z.object({
   trainingId: z.coerce.number(),
 });
 
-export const AddQuestionSchema = z.object({
+export const TrainingIdQuestionIdParamsSchema = TrainingIdParamSchema.extend({
+  questionId: z.coerce.number(),
+});
+
+export const AddQuestionRequestSchema = z.object({
   text: z.string().min(1).max(1024),
   choices: z
     .array(
@@ -87,10 +107,44 @@ export const AddQuestionSchema = z.object({
     ),
 });
 
-export const GenerateQuestionSchema = z.object({
+export const AddQuestionResponseSchema = z.object({
+  id: z.number(),
+  text: z.string(),
+  source: z.enum(SOURCE),
+  choices: z.array(
+    z.object({
+      id: z.number(),
+      text: z.string(),
+      isCorrect: z.boolean(),
+    })
+  ),
+});
+
+export const EditQuestionRequestSchema = AddQuestionRequestSchema;
+export const EditQuestionResponseSchema = AddQuestionResponseSchema;
+
+export const GetQuestionsResponseSchema = z.array(AddQuestionResponseSchema);
+
+export const ModelSchema = z.enum(['gpt-4o-mini', 'gemini-2.0-flash']);
+
+export const GenerateQuestionsRequestSchema = z.object({
+  model: ModelSchema,
   description: z.string(),
   numQuestions: z.number().min(1).max(10),
   trainingId: z.number().int().positive(),
+});
+
+export const GenerateQuestionsResponseSchema = z.array(
+  AddQuestionResponseSchema
+);
+
+export const GenerateDescriptionRequestSchema = z.object({
+  model: ModelSchema,
+  title: z.string().max(255),
+});
+
+export const GenerateDescriptionResponseSchema = z.object({
+  description: z.string().max(2048),
 });
 
 export const TrainingsPresignedUrlRequestSchema = z.object({

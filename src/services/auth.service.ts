@@ -19,8 +19,8 @@ import { compare } from 'bcrypt';
 import { and, DrizzleQueryError, eq } from 'drizzle-orm';
 import type z from 'zod';
 
-export class AuthService {
-  static async register(values: z.infer<typeof RegisterRequestSchema>) {
+class AuthService {
+  async register(values: z.infer<typeof RegisterRequestSchema>) {
     try {
       const hashedPassword = await hashPassword(values.password);
       await db.insert(users).values({
@@ -40,7 +40,7 @@ export class AuthService {
     };
   }
 
-  static async login(values: z.infer<typeof LoginSchema>) {
+  async login(values: z.infer<typeof LoginSchema>) {
     const user = await db.query.users.findFirst({
       where: eq(users.email, values.email),
       columns: {
@@ -60,12 +60,11 @@ export class AuthService {
     const token = await sign({
       id: user.id,
       role: user.role,
-      email: user.email,
     });
     return token;
   }
 
-  static async me(userId: number) {
+  async me(userId: number) {
     const user = await db.query.users.findFirst({
       where: (usersTable) => eq(usersTable.id, userId),
       columns: {
@@ -78,9 +77,7 @@ export class AuthService {
     return user;
   }
 
-  static async sendCode({
-    phoneNumber,
-  }: z.infer<typeof SendCodeRequestSchema>) {
+  async sendCode({ phoneNumber }: z.infer<typeof SendCodeRequestSchema>) {
     const user = await db.query.users.findFirst({
       where: (usersTable) => eq(usersTable.phoneNumber, phoneNumber),
       columns: {
@@ -95,7 +92,7 @@ export class AuthService {
     return { requestId };
   }
 
-  static async verifyCode({
+  async verifyCode({
     code,
     phoneNumber,
     requestId,
@@ -125,3 +122,5 @@ export class AuthService {
     return { status };
   }
 }
+
+export const authService = new AuthService();

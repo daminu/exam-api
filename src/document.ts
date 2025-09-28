@@ -10,6 +10,19 @@ import {
   SendCodeRequestSchema,
   SendCodeResponseSchema,
   VerifyCodeRequestSchema,
+  GenerateDescriptionRequestSchema,
+  GenerateDescriptionResponseSchema,
+  GetTrainingResponseSchema,
+  TrainingIdParamSchema,
+  GetTrainingsResponseSchema,
+  AddQuestionRequestSchema,
+  AddQuestionResponseSchema,
+  GetQuestionsResponseSchema,
+  TrainingIdQuestionIdParamsSchema,
+  EditQuestionRequestSchema,
+  EditQuestionResponseSchema,
+  GenerateQuestionsRequestSchema,
+  GenerateQuestionsResponseSchema,
 } from './utils/schema.util.js';
 import { createDocument } from 'zod-openapi';
 
@@ -141,7 +154,7 @@ export const document: ReturnType<typeof createDocument> = createDocument({
             description: '200 OK',
             content: {
               'application/json': {
-                schema: CreateTrainingResponseSchema,
+                schema: GetTrainingsResponseSchema,
               },
             },
           },
@@ -167,6 +180,86 @@ export const document: ReturnType<typeof createDocument> = createDocument({
         },
       },
     },
+    '/v1/trainings/{trainingId}': {
+      get: {
+        requestParams: {
+          path: TrainingIdParamSchema,
+        },
+        responses: {
+          '200': {
+            description: '200 OK',
+            content: {
+              'application/json': {
+                schema: GetTrainingResponseSchema,
+              },
+            },
+          },
+        },
+      },
+    },
+    '/v1/trainings/{trainingId}/questions': {
+      post: {
+        requestParams: {
+          path: TrainingIdParamSchema,
+        },
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: AddQuestionRequestSchema,
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: '201 Created',
+            content: {
+              'application/json': {
+                schema: AddQuestionResponseSchema,
+              },
+            },
+          },
+        },
+      },
+      get: {
+        requestParams: {
+          path: TrainingIdParamSchema,
+        },
+        responses: {
+          '200': {
+            description: '201 OK',
+            content: {
+              'application/json': {
+                schema: GetQuestionsResponseSchema,
+              },
+            },
+          },
+        },
+      },
+    },
+    '/v1/trainings/{trainingId}/questions/{questionId}': {
+      put: {
+        requestParams: {
+          path: TrainingIdQuestionIdParamsSchema,
+        },
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: EditQuestionRequestSchema,
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: '200 OK',
+            content: {
+              'application/json': {
+                schema: EditQuestionResponseSchema,
+              },
+            },
+          },
+        },
+      },
+    },
     // Uploads
     '/v1/uploads/trainings': {
       post: {
@@ -183,6 +276,48 @@ export const document: ReturnType<typeof createDocument> = createDocument({
             content: {
               'application/json': {
                 schema: TrainingsPresignedUrlResponseSchema,
+              },
+            },
+          },
+        },
+      },
+    },
+    '/v1/ai/questions/generate': {
+      post: {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: GenerateQuestionsRequestSchema,
+            },
+          },
+        },
+        responses: {
+          '201': {
+            description: '201 Created',
+            content: {
+              'application/json': {
+                schema: GenerateQuestionsResponseSchema,
+              },
+            },
+          },
+        },
+      },
+    },
+    '/v1/ai/description/generate': {
+      post: {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: GenerateDescriptionRequestSchema,
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: '200 OK',
+            content: {
+              'application/json': {
+                schema: GenerateDescriptionResponseSchema,
               },
             },
           },
